@@ -16,68 +16,75 @@ local Window = Fluent:CreateWindow({
 
 -- Criar as Tabs
 local Tabs = {
-    Script = Window:AddTab({ Title = "Script" }),
     Classes = Window:AddTab({ Title = "Classes" }),
-    Creditos = Window:AddTab({ Title = "Créditos" })
+    ScriptsDeTPs = Window:AddTab({ Title = "Scripts" }),
+    Creditos = Window:AddTab({ Title = "Créditos (feito por Cezar)" })
 }
 
--- Adicionar o botão para o "Skull Hub"
-Tabs.Script:AddButton({
-    Title = "1 - Skull Hub:",
-    Callback = function()
-        local success, err = pcall(function()
-            loadstring(game:HttpGet('https://skullhub.xyz/loader.lua'))()
-        end)
-        if not success then
-            Fluent:Notify({
-                Title = "Erro",
-                Content = "Erro ao carregar o Skull Hub: " .. err,
-                Duration = 5
-            })
-        end
-    end
-})
-
--- Lista de classes para compra
-local classList = {
+-- CLASSES
+local classes = {
     "Horse", "Musician", "Doctor", "Miner", "Arsonist", "Packmaster",
     "Necromancer", "Werewolf", "High Roller", "Conductor", "Cowboy",
     "The Alamo", "Zombie", "Vampire", "Priest", "Survivalist", "Ironclad"
 }
 
-for _, class in ipairs(classList) do
+for _, class in ipairs(classes) do
     Tabs.Classes:AddButton({
         Title = "Comprar " .. class,
         Callback = function()
-            local success, err = pcall(function()
-                local args = { [1] = class }
-                game:GetService("ReplicatedStorage")
-                    :WaitForChild("Shared")
-                    :WaitForChild("RemotePromise")
-                    :WaitForChild("Remotes")
-                    :WaitForChild("C_BuyClass"):FireServer(unpack(args))
-            end)
-            if not success then
-                Fluent:Notify({
-                    Title = "Erro",
-                    Content = "Erro ao comprar a classe " .. class .. ": " .. err,
-                    Duration = 5
-                })
-            end
+            game:GetService("ReplicatedStorage")
+                :WaitForChild("Shared")
+                :WaitForChild("RemotePromise")
+                :WaitForChild("Remotes")
+                :WaitForChild("C_BuyClass"):FireServer(class)
         end
     })
 end
 
--- Créditos
-Tabs.Creditos:AddParagraph({
-    Title = "Criado por",
-    Content = "Cezar"
+-- SCRIPT PARA ZERAR
+Tabs.ScriptsDeTPs:AddButton({
+    Title = "Executar DeadRails",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/gumanba/Scripts/main/DeadRails"))()
+    end
 })
 
-Tabs.Creditos:AddParagraph({
-    Title = "Suporte",
-    Content = "cezarr0294"
+Tabs.ScriptsDeTPs:AddButton({
+    Title = "null-fire",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/InfernusScripts/Null-Fire/main/Loader"))()
+    end
 })
 
--- Garantir que a GUI fique visível e funcional
-Window:Show()
+-- ESP com distância
+local espEnabled = false
+local espGuiTable = {}
+local runService = game:GetService("RunService")
+local localPlayer = game.Players.LocalPlayer
+
+function createESP(player)
+    if not player.Character or not player.Character:FindFirstChild("Head") then return end
+
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "ESPGui"
+    billboard.Adornee = player.Character.Head
+    billboard.Size = UDim2.new(0, 100, 0, 40)
+    billboard.AlwaysOnTop = true
+
+    local text = Instance.new("TextLabel")
+    text.Size = UDim2.new(1, 0, 1, 0)
+    text.BackgroundTransparency = 1
+    text.TextColor3 = Color3.fromRGB(255, 0, 0)
+    text.TextStrokeTransparency = 0.5
+    text.TextScaled = true
+    text.Font = Enum.Font.SourceSansBold
+    text.Text = player.Name
+
+    text.Parent = billboard
+    billboard.Parent = player.Character.Head
+    espGuiTable[player] = { gui = billboard, label = text }
+end
+
+function removeESP(player)
+    if espGuiTable[player] then
+        espGuiTable
