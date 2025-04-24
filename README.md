@@ -18,7 +18,9 @@ local Tabs = {
 Tabs.Script:AddButton({
     Title = "1 - Skull hub:",
     Callback = function()
-        loadstring(game:HttpGet('https://skullhub.xyz/loader.lua'))()
+        pcall(function() -- Usando pcall para evitar erros de execução inesperados
+            loadstring(game:HttpGet('https://skullhub.xyz/loader.lua'))()
+        end)
     end
 })
 
@@ -33,14 +35,14 @@ for _, class in ipairs(classList) do
     Tabs.Classes:AddButton({
         Title = "Comprar " .. class,
         Callback = function()
-            local args = {
-                [1] = class
-            }
-            game:GetService("ReplicatedStorage")
-                :WaitForChild("Shared")
-                :WaitForChild("RemotePromise")
-                :WaitForChild("Remotes")
-                :WaitForChild("C_BuyClass"):FireServer(unpack(args))
+            pcall(function() -- Usando pcall para prevenir erros ao tentar comprar classe
+                local args = { [1] = class }
+                game:GetService("ReplicatedStorage")
+                    :WaitForChild("Shared")
+                    :WaitForChild("RemotePromise")
+                    :WaitForChild("Remotes")
+                    :WaitForChild("C_BuyClass"):FireServer(unpack(args))
+            end)
         end
     })
 end
