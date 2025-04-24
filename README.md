@@ -1,5 +1,6 @@
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 
+-- Criar a janela principal
 local Window = Fluent:CreateWindow({
     Title = "Fluent " .. Fluent.Version,
     TabWidth = 120,
@@ -7,24 +8,33 @@ local Window = Fluent:CreateWindow({
     Theme = "Dark"
 })
 
--- Tabs
+-- Definir as Tabs
 local Tabs = {
     Script = Window:AddTab({ Title = "Script" }),
     Classes = Window:AddTab({ Title = "Classes" }),
     Creditos = Window:AddTab({ Title = "Créditos" })
 })
 
--- Botão: Skull Hub
+-- Adicionar o botão para o "Skull Hub"
 Tabs.Script:AddButton({
     Title = "1 - Skull hub:",
     Callback = function()
-        pcall(function() -- Usando pcall para evitar erros de execução inesperados
+        -- Tente executar o código do Skull Hub
+        local success, err = pcall(function()
             loadstring(game:HttpGet('https://skullhub.xyz/loader.lua'))()
         end)
+        if not success then
+            -- Em caso de erro, exiba uma notificação
+            Fluent:Notify({
+                Title = "Erro",
+                Content = "Erro ao carregar o Skull Hub: " .. err,
+                Duration = 5
+            })
+        end
     end
 })
 
--- Lista de classes
+-- Lista de classes para compra
 local classList = {
     "Horse", "Musician", "Doctor", "Miner", "Arsonist", "Packmaster",
     "Necromancer", "Werewolf", "High Roller", "Conductor", "Cowboy",
@@ -35,7 +45,8 @@ for _, class in ipairs(classList) do
     Tabs.Classes:AddButton({
         Title = "Comprar " .. class,
         Callback = function()
-            pcall(function() -- Usando pcall para prevenir erros ao tentar comprar classe
+            -- Tente comprar a classe
+            local success, err = pcall(function()
                 local args = { [1] = class }
                 game:GetService("ReplicatedStorage")
                     :WaitForChild("Shared")
@@ -43,6 +54,14 @@ for _, class in ipairs(classList) do
                     :WaitForChild("Remotes")
                     :WaitForChild("C_BuyClass"):FireServer(unpack(args))
             end)
+            if not success then
+                -- Em caso de erro, exiba uma notificação
+                Fluent:Notify({
+                    Title = "Erro",
+                    Content = "Erro ao comprar a classe " .. class .. ": " .. err,
+                    Duration = 5
+                })
+            end
         end
     })
 end
@@ -57,23 +76,3 @@ Tabs.Creditos:AddParagraph({
     Title = "Suporte",
     Content = "cezarr0294"
 })
-
--- Botão de minimizar
-local isMinimized = false
-
-local function toggleWindow()
-    isMinimized = not isMinimized
-    Window.Visible = not isMinimized
-end
-
-local minimizeButton = Instance.new("TextButton")
-minimizeButton.Size = UDim2.new(0, 100, 0, 50)
-minimizeButton.Position = UDim2.new(0, 10, 1, -10)
-minimizeButton.AnchorPoint = Vector2.new(0, 1)
-minimizeButton.Text = "Minimizar"
-minimizeButton.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-
-minimizeButton.MouseButton1Click:Connect(function()
-    toggleWindow()
-    minimizeButton.Text = isMinimized and "Abrir Menu" or "Minimizar"
-end)
